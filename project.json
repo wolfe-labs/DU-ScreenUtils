@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "fmtVersion": 3
+  },
+  "name": "ScreenUtils",
+  "description": "",
+  "sourcePath": "src",
+  "outputPath": "out",
+  "libs": [],
+  "builds": {
+    "debug.rs": {
+      "name": "debug.rs",
+      "type": "screen",
+      "slots": {}
+    },
+    "main": {
+      "name": "main",
+      "type": "control",
+      "slots": {}
+    }
+  },
+  "targets": {
+    "development": {
+      "name": "development",
+      "minify": false,
+      "handleErrors": false
+    }
+  },
+  "internalPaths": [
+    "autoconf/",
+    "cpml/",
+    "pl/",
+    "utils/event"
+  ]
+}
