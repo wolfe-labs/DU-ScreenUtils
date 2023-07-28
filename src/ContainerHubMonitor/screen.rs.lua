@@ -9,12 +9,13 @@ local HUB_BORDER_OFFSET, HUB_BORDER_THICKNESS = 8, 2
 local HUB_BORDER_COLOR = { 255, 127, 0 }
 
 -- The hub text properties
-local HUB_LABEL_FONT, HUB_LABEL_SIZE = 'Oxanium', 24
+local HUB_LABEL_FONT, HUB_LABEL_SIZE = 'Oxanium', 16
 local HUB_LABEL_COLOR = { 255, 127, 0 }
 
 -- The hub progress bar properties
-local HUB_PROGRESS_WIDTH, HUB_PROGRESS_HEIGHT = 2 * VOXEL_SIZE, 12
-local HUB_PROGRESS_FONT_NAME, HUB_PROGRESS_FONT_SIZE = 'Oxanium', 12
+local HUB_PROGRESS_ENABLED = true
+local HUB_PROGRESS_WIDTH, HUB_PROGRESS_HEIGHT = 1.5 * VOXEL_SIZE, 8
+local HUB_PROGRESS_FONT_NAME, HUB_PROGRESS_FONT_SIZE = 'Oxanium', HUB_PROGRESS_HEIGHT
 local HUB_PROGRESS_BACKGROUND = { 191, 191, 191 }
 local HUB_PROGRESS_FOREGROUND = { 255, 127, 0 }
 local HUB_PROGRESS_TEXT_COLOR = { 0, 0, 0 }
@@ -24,10 +25,13 @@ local layerBackground = createLayer()
 local loadedBackground = loadImage(BACKGROUND)
 addImage(layerBackground, loadedBackground, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT)
 
+-- Set-up our contours layer
+local layerContour = createLayer()
+
 -- Set-up our data layer
 local layerData = createLayer()
-local fontLabel = loadFont(HUB_LABEL_FONT, HUB_LABEL_SIZE)
-local fontProgress = loadFont(HUB_PROGRESS_FONT_NAME, HUB_PROGRESS_FONT_SIZE)
+local fontLabel = loadFont(HUB_LABEL_FONT, toPixel(HUB_LABEL_SIZE))
+local fontProgress = loadFont(HUB_PROGRESS_FONT_NAME, toPixel(HUB_PROGRESS_FONT_SIZE))
 setDefaultTextAlign(layerData, AlignH_Center, AlignV_Top)
 
 -- Returns an HDR color from RGBA
@@ -97,7 +101,7 @@ function drawHub(hub)
   local top, bottom = centerY - 0.5 * HUB_HEIGHT, centerY + 0.5 * HUB_HEIGHT
 
   -- Draws the hub contour
-  drawLineShape(layerData, {
+  drawLineShape(layerContour, {
     { left, top - offset },
     { right, top - offset },
     { right + offset, top },
@@ -109,17 +113,27 @@ function drawHub(hub)
   }, HUB_BORDER_THICKNESS, HUB_BORDER_COLOR)
 
   -- Draws hub name
-  drawText(layerData, fontLabel, hub.name, centerX, bottom + 2 * offset, HUB_LABEL_COLOR)
+  drawText(layerData, fontLabel, hub.name, centerX, bottom + 2 * offset + 0.5 * HUB_PROGRESS_HEIGHT, HUB_LABEL_COLOR)
 
   -- Draws hub fill progress
-  drawProgressBar(
-    layerData,
-    centerX - 0.5 * HUB_PROGRESS_WIDTH,
-    bottom + 2 * offset + HUB_LABEL_SIZE,
-    HUB_PROGRESS_WIDTH,
-    HUB_PROGRESS_HEIGHT,
-    hub.used / hub.total
-  )
+  if HUB_PROGRESS_ENABLED then
+    drawProgressBar(
+      layerData,
+      centerX - 0.5 * HUB_PROGRESS_WIDTH,
+      bottom + offset - 0.5 * HUB_PROGRESS_HEIGHT,
+      HUB_PROGRESS_WIDTH,
+      HUB_PROGRESS_HEIGHT,
+      (hub.total > 0 and hub.used / hub.total) or 0
+    )
+    -- drawProgressBar(
+    --   layerData,
+    --   centerX - 0.5 * HUB_PROGRESS_WIDTH,
+    --   bottom + 3 * offset + HUB_LABEL_SIZE,
+    --   HUB_PROGRESS_WIDTH,
+    --   HUB_PROGRESS_HEIGHT,
+    --   (hub.total > 0 and hub.used / hub.total) or 0
+    -- )
+  end
 end
 
 -- Draws the background
