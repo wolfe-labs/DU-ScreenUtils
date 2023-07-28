@@ -1,24 +1,8 @@
--- The background image
-local BACKGROUND = 'assets.prod.novaquark.com/113304/f91e8dcb-94c5-4ee0-ac38-c1fa39ddd62f.png'
-
 -- The Container Hub dimensions
 local HUB_WIDTH, HUB_HEIGHT = 232, 100
 
--- The hub border parameters
-local HUB_BORDER_OFFSET, HUB_BORDER_THICKNESS = 8, 2
-local HUB_BORDER_COLOR = { 255, 127, 0 }
-
--- The hub text properties
-local HUB_LABEL_FONT, HUB_LABEL_SIZE = 'Oxanium', 16
-local HUB_LABEL_COLOR = { 255, 127, 0 }
-
 -- The hub progress bar properties
-local HUB_PROGRESS_ENABLED = true
 local HUB_PROGRESS_WIDTH, HUB_PROGRESS_HEIGHT = 1.5 * VOXEL_SIZE, 8
-local HUB_PROGRESS_FONT_NAME, HUB_PROGRESS_FONT_SIZE = 'Oxanium', HUB_PROGRESS_HEIGHT
-local HUB_PROGRESS_BACKGROUND = { 191, 191, 191 }
-local HUB_PROGRESS_FOREGROUND = { 255, 127, 0 }
-local HUB_PROGRESS_TEXT_COLOR = { 0, 0, 0 }
 
 -- Set-up our background layer
 local layerBackground = createLayer()
@@ -37,10 +21,10 @@ setDefaultTextAlign(layerData, AlignH_Center, AlignV_Top)
 -- Returns an HDR color from RGBA
 function color(rgba)
   return {
-    rgba[1] / 255,
-    rgba[2] / 255,
-    rgba[3] / 255,
-    rgba[4] or 1,
+    tonumber(rgba[1]) / 255,
+    tonumber(rgba[2]) / 255,
+    tonumber(rgba[3]) / 255,
+    tonumber(rgba[4]) or 1,
   }
 end
 

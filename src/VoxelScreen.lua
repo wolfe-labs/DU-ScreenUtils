@@ -71,27 +71,30 @@ local function VoxelScreen(screen)
   --- Renders a Render Script with extra voxel/point metadata
   ---@param renderScript string
   local function fnRender(renderScript, data)
+    -- Those are the lines prepending the script
+    local scriptPreload = {
+      'local json = require(\'json\')',
+      'local VOXEL_SIZE = ' .. VOXEL_SIZE,
+      'local PIXEL_WIDTH, PIXEL_HEIGHT = getResolution()',
+      'local POINT_SIZE = PIXEL_WIDTH / ' .. voxelReferenceWidth,
+      'local POINT_X = ' .. voxelOffsetX,
+      'local POINT_Y = ' .. voxelOffsetY,
+      'local POINT_WIDTH = ' .. voxelReferenceWidth,
+      'local POINT_HEIGHT = math.floor(POINT_WIDTH * PIXEL_HEIGHT / PIXEL_WIDTH)',
+      'function toPixel(points) return points * POINT_SIZE end',
+    }
+
     -- Generate data rows
-    local dataRows = {}
     for k, v in pairs(data or {}) do
-      table.insert(dataRows, ('local %s = json.decode([[ %s ]])'):format(k, json.encode(v)))
+      table.insert(scriptPreload, ('local %s = json.decode([[ %s ]])'):format(k, json.encode(v)))
     end
+
+    -- Finally adds the render script
+    table.insert(scriptPreload, renderScript)
 
     -- Prepends voxel globals
     screen.setRenderScript(
-      table.concat({
-        'local json = require(\'json\')',
-        'local VOXEL_SIZE = ' .. VOXEL_SIZE,
-        'local PIXEL_WIDTH, PIXEL_HEIGHT = getResolution()',
-        'local POINT_SIZE = PIXEL_WIDTH / ' .. voxelReferenceWidth,
-        'local POINT_X = ' .. voxelOffsetX,
-        'local POINT_Y = ' .. voxelOffsetY,
-        'local POINT_WIDTH = ' .. voxelReferenceWidth,
-        'local POINT_HEIGHT = math.floor(POINT_WIDTH * PIXEL_HEIGHT / PIXEL_WIDTH)',
-        'function toPixel(points) return points * POINT_SIZE end',
-        table.unpack(dataRows),
-        renderScript,
-      }, '\n')
+      table.concat(scriptPreload, '\n')
     )
   end
 
