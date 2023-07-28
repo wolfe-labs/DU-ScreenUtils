@@ -8,13 +8,18 @@
   "outputPath": "out",
   "libs": [],
   "builds": {
-    "debug.rs": {
-      "name": "debug.rs",
+    "tests/debug.rs": {
+      "name": "tests/debug.rs",
       "type": "screen",
       "slots": {}
     },
-    "main": {
-      "name": "main",
+    "tests/main": {
+      "name": "tests/main",
+      "type": "control",
+      "slots": {}
+    },
+    "ContainerHubMonitor/main": {
+      "name": "ContainerHubMonitor/main",
       "type": "control",
       "slots": {}
     }
