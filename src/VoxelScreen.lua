@@ -59,10 +59,13 @@ local function VoxelScreen(screen)
   local screenOrientationHorizontal = vec3(screen.getRight())
   local screenOrientationVertical = vec3(screen.getUp())
   local screenPosition = vec3(screen.getPosition())
-  local screenSignedValueX = getSignedVectorLength(screenOrientationHorizontal)
-  local screenSignedValueY = getSignedVectorLength(screenOrientationVertical)
-  local screenPositionLeft = screenOrientationHorizontal:len() * (screenPosition * screenOrientationHorizontal):len() - (0.5 * metricWidth) * screenSignedValueX
-  local screenPositionTop = screenOrientationVertical:len() * (screenPosition * screenOrientationVertical):len() - (0.5 * metricHeight) * screenSignedValueY
+  local screenOrientationSignedX = getSignedVectorLength(screenOrientationHorizontal)
+  local screenOrientationSignedY = getSignedVectorLength(screenOrientationVertical)
+  local screenPositionLeft = getSignedVectorLength(screenPosition * screenOrientationHorizontal) - (0.5 * metricWidth) * screenOrientationSignedX
+  local screenPositionTop = (screenPosition * screenOrientationVertical):len() - (0.5 * metricHeight) * screenOrientationSignedY
+
+  system.print(('{ %.3f, %.3f, %.3f }'):format(screenPosition:unpack()))
+  system.print(('{ %.3f, %.3f }'):format(screenPositionLeft, screenPositionTop))
 
   -- Calculate screen offset from voxel grid
   local voxelOffsetX = 0.5 * VOXEL_SIZE + (convertMetricToVoxelSize(screenPositionLeft) + baseVoxelOffsetX) % VOXEL_SIZE
@@ -103,12 +106,15 @@ local function VoxelScreen(screen)
   ---@return table<number,number> The X and Y voxel coordinates
   local function fnGetPointOnScreen(point)
     -- Converts position to screen-space
-    local pointX = (point * screenOrientationHorizontal):len()
+    local pointX = getSignedVectorLength(point * screenOrientationHorizontal)
     local pointY = (point * screenOrientationVertical):len()
 
     -- Calcualtes offset from left and top positions
-    local offsetX = (pointX - screenPositionLeft) * screenSignedValueX
-    local offsetY = (pointY - screenPositionTop) * screenSignedValueY
+    local offsetX = (pointX - screenPositionLeft) * screenOrientationSignedX
+    local offsetY = (pointY - screenPositionTop) * screenOrientationSignedY
+    
+    system.print(('P { %.3f, %.3f }'):format(pointX, pointY))
+    system.print(('P { %.3f, %.3f }'):format(offsetX, offsetY))
 
     -- Calculates final voxel position
     return {

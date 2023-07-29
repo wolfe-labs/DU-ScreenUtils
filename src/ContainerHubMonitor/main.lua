@@ -1,4 +1,4 @@
--- Automatic Container Hub Monitor v1.0
+-- Automatic Container Hub Monitor v1.0.1
 -- by Wolfram / Wolfe Labs
 -- https://github.com/wolfe-labs/DU-ScreenUtils
 
