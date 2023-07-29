@@ -1,4 +1,4 @@
--- Automatic Container Hub Monitor v1.0.1
+-- Automatic Container Hub Monitor v1.1.0
 -- by Wolfram / Wolfe Labs
 -- https://github.com/wolfe-labs/DU-ScreenUtils
 
@@ -6,15 +6,23 @@
 Background = 'assets.prod.novaquark.com/113304/36ab3926-d7d6-4e62-8714-a4c613195004.png' --export: The URL for the background image
 Font = 'Oxanium' --export: The font used on the UI
 
-Label_Color = '87,157,237' --export: The color used for the labels under container hubs
-Border_Color = '87,157,237' --export: The color used for the borders around container hubs
+Label_Color = '31,63,255' --export: The color used for the labels under container hubs
+Label_Color_Intensity = 2.5 --export: HDR color intensity for the labels
+Label_Percentage = false --export: Show used percentage on labels
+Border_Color = '31,63,255' --export: The color used for the borders around container hubs
+Border_Color_Intensity = 2.5 --export: HDR color intensity for the borders
 
 Progress_Enabled = true --export: Enables or disables the progress bar
-Progress_Background = '191,191,191' --export: The background color of the progress bar
-Progress_Foreground = '87,157,237' --export: The foreground color of the progress bar
-Progress_Label = '0,0,0' --export: The label color of the progress bar
+Progress_Background = '5, 10, 38' --export: The background color of the progress bars
+Progress_Background_Intensity = 0.2 --export: HDR color intensity for the background color of the progress bars
+Progress_Foreground = '31,63,255' --export: The foreground color of the progress bars
+Progress_Foreground_Intensity = 2.5 --export: HDR color intensity for the foreground color of the progress bars
+Progress_Border = '31,63,255' --export: The border color of the progress bars
+Progress_Border_Intensity = 2.5 --export: HDR color intensity for the border color of the progress bars
 
 -- Script starts here!
+
+unit.hideWidget()
 
 local VoxelScreen = require('../VoxelScreen')
 
@@ -80,23 +88,35 @@ local function updateScreen()
     HUB_BORDER_OFFSET = 8,
     HUB_BORDER_THICKNESS = 2,
     HUB_BORDER_COLOR = colorStringToRgba(Border_Color),
+    HUB_BORDER_COLOR_INTENSITY = Border_Color_Intensity,
 
     -- Labels
     HUB_LABEL_FONT = Font,
     HUB_LABEL_SIZE = 16,
     HUB_LABEL_COLOR = colorStringToRgba(Label_Color),
+    HUB_LABEL_COLOR_INTENSITY = Label_Color_Intensity,
+    HUB_LABEL_PERCENTAGE_ENABLED = Label_Percentage,
 
     -- Progress bars
     HUB_PROGRESS_ENABLED = Progress_Enabled,
     HUB_PROGRESS_FONT_NAME = Font,
     HUB_PROGRESS_FONT_SIZE = 8,
     HUB_PROGRESS_BACKGROUND = colorStringToRgba(Progress_Background),
+    HUB_PROGRESS_BACKGROUND_INTENSITY = Progress_Background_Intensity,
     HUB_PROGRESS_FOREGROUND = colorStringToRgba(Progress_Foreground),
-    HUB_PROGRESS_TEXT_COLOR = colorStringToRgba(Progress_Label),
+    HUB_PROGRESS_FOREGROUND_INTENSITY = Progress_Foreground_Intensity,
+    HUB_PROGRESS_BORDER = colorStringToRgba(Progress_Border),
+    HUB_PROGRESS_BORDER_INTENSITY = Progress_Border_Intensity,
+    HUB_PROGRESS_BORDER_THICKNESS = 2,
   })
 end
 
-updateScreen()
+-- Updates screen one last time when leaving
+unit:onEvent('onStop', updateScreen)
 
--- Done, stop doing work
-unit.exit()
+-- Update screen automatically when nearby
+unit:onEvent('onTimer', updateScreen)
+unit.setTimer('update', 1)
+
+-- Runs first update
+updateScreen()

@@ -19,13 +19,18 @@ local fontProgress = loadFont(HUB_PROGRESS_FONT_NAME, toPixel(HUB_PROGRESS_FONT_
 setDefaultTextAlign(layerData, AlignH_Center, AlignV_Top)
 
 -- Returns an HDR color from RGBA
-function color(rgba)
+function color(intensity, rgba)
   return {
-    tonumber(rgba[1]) / 255,
-    tonumber(rgba[2]) / 255,
-    tonumber(rgba[3]) / 255,
+    tonumber(rgba[1]) / 255 * intensity,
+    tonumber(rgba[2]) / 255 * intensity,
+    tonumber(rgba[3]) / 255 * intensity,
     tonumber(rgba[4]) or 1,
   }
+end
+
+-- Returns an HDR color from RGBA, but as function parameters
+function colorParam(intensity, rgba)
+  return table.unpack(color(intensity, rgba))
 end
 
 -- Rounds a number to N decimals
@@ -35,28 +40,38 @@ function round(number, decimals)
 end
 
 -- Draws a box
-function drawBox(layer, x, y, width, height, colorRgba)
+function drawBox(layer, x, y, width, height, colorRgba, colorIntensity)
   if colorRgba then
-    setNextFillColor(layer, table.unpack(color(colorRgba)))
+    setNextFillColor(layer, colorParam(colorIntensity, colorRgba))
   end
   addBox(layer, toPixel(x), toPixel(y), toPixel(width), toPixel(height))
 end
 
+-- Draws a box (outline)
+function strokeBox(layer, x, y, width, height, thickness, colorRgba, colorIntensity)
+  drawLineShape(layer, {
+    { x, y },
+    { x + width, y },
+    { x + width, y + height },
+    { x, y + height },
+  }, thickness, colorRgba, colorIntensity)
+end
+
 -- Draws text
-function drawText(layer, font, text, x, y, colorRgba)
+function drawText(layer, font, text, x, y, colorRgba, colorIntensity)
   if colorRgba then
-    setNextFillColor(layer, table.unpack(color(colorRgba)))
+    setNextFillColor(layer, colorParam(colorIntensity, colorRgba))
   end
   addText(layer, font, text, toPixel(x), toPixel(y))
 end
 
 -- Draws a shape made out of lines
-function drawLineShape(layer, points, thickness, colorRgba)
+function drawLineShape(layer, points, thickness, colorRgba, colorIntensity)
   for _, point in pairs(points) do
     local nextPoint = points[_ + 1] or points[1]
     
     if colorRgba then
-      setNextStrokeColor(layer, table.unpack(color(colorRgba)))
+      setNextStrokeColor(layer, colorParam(colorIntensity, colorRgba))
     end
     setNextStrokeWidth(layer, thickness)
     addLine(layer, toPixel(point[1]), toPixel(point[2]), toPixel(nextPoint[1]), toPixel(nextPoint[2]))
@@ -64,14 +79,18 @@ function drawLineShape(layer, points, thickness, colorRgba)
 end
 
 -- Draws a progress bar
-function drawProgressBar(layer, x, y, width, height, progress)
+function drawProgressBar(layer, x, y, width, height, progress, label)
   -- Draws the progress bar
-  drawBox(layer, x, y, width, height, HUB_PROGRESS_BACKGROUND)
-  drawBox(layer, x, y, width * progress, height, HUB_PROGRESS_FOREGROUND)
+  drawBox(layer, x, y, width, height, HUB_PROGRESS_BACKGROUND, HUB_PROGRESS_BACKGROUND_INTENSITY)
+  drawBox(layer, x, y, width * progress, height, HUB_PROGRESS_FOREGROUND, HUB_PROGRESS_FOREGROUND_INTENSITY)
+  strokeBox(layer, x, y, width, height, HUB_BORDER_THICKNESS, HUB_PROGRESS_BORDER, HUB_PROGRESS_BORDER_INTENSITY)
 
   -- Draws the label
-  setNextTextAlign(layer, AlignH_Center, AlignV_Middle)
-  drawText(layer, fontProgress, ('%.2f%%'):format(100 * progress), x + 0.5 * width, y + 0.5 * height, HUB_PROGRESS_TEXT_COLOR)
+  if label then
+    setNextTextAlign(layer, AlignH_Center, AlignV_Middle)
+    setNextShadow(layer, toPixel(1), colorParam(HUB_PROGRESS_BACKGROUND_INTENSITY, HUB_PROGRESS_BACKGROUND))
+    drawText(layer, fontProgress, label, x + 0.5 * width, y + 0.5 * height, HUB_PROGRESS_TEXT_COLOR, HUB_PROGRESS_TEXT_COLOR_INTENSITY)
+  end
 end
 
 -- Helper function to draw a Container Hub
@@ -86,18 +105,23 @@ function drawHub(hub)
 
   -- Draws the hub contour
   drawLineShape(layerContour, {
-    { left, top - offset },
-    { right, top - offset },
-    { right + offset, top },
-    { right + offset, bottom },
-    { right, bottom + offset },
-    { left, bottom + offset },
-    { left - offset, bottom },
-    { left - offset, top },
-  }, HUB_BORDER_THICKNESS, HUB_BORDER_COLOR)
+    { left + offset, top - offset },
+    { right - offset, top - offset },
+    { right + offset, top + offset },
+    { right + offset, bottom - offset },
+    { right - offset, bottom + offset },
+    { left + offset, bottom + offset },
+    { left - offset, bottom - offset },
+    { left - offset, top + offset },
+  }, HUB_BORDER_THICKNESS, HUB_BORDER_COLOR, HUB_BORDER_COLOR_INTENSITY)
 
   -- Draws hub name
-  drawText(layerData, fontLabel, hub.name, centerX, bottom + 2 * offset + 0.5 * HUB_PROGRESS_HEIGHT, HUB_LABEL_COLOR)
+  local usedPercentage = (hub.total > 0 and hub.used / hub.total) or 0
+  local label = hub.name
+  if HUB_LABEL_PERCENTAGE_ENABLED then
+    label = ('%s (%.2f%%)'):format(hub.name, 100 * usedPercentage)
+  end
+  drawText(layerData, fontLabel, label, centerX, bottom + 2 * offset + 0.5 * HUB_PROGRESS_HEIGHT, HUB_LABEL_COLOR, HUB_LABEL_COLOR_INTENSITY)
 
   -- Draws hub fill progress
   if HUB_PROGRESS_ENABLED then
@@ -107,16 +131,8 @@ function drawHub(hub)
       bottom + offset - 0.5 * HUB_PROGRESS_HEIGHT,
       HUB_PROGRESS_WIDTH,
       HUB_PROGRESS_HEIGHT,
-      (hub.total > 0 and hub.used / hub.total) or 0
+      usedPercentage
     )
-    -- drawProgressBar(
-    --   layerData,
-    --   centerX - 0.5 * HUB_PROGRESS_WIDTH,
-    --   bottom + 3 * offset + HUB_LABEL_SIZE,
-    --   HUB_PROGRESS_WIDTH,
-    --   HUB_PROGRESS_HEIGHT,
-    --   (hub.total > 0 and hub.used / hub.total) or 0
-    -- )
   end
 end
 
