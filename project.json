@@ -22,6 +22,11 @@
       "name": "ContainerHubMonitor/main",
       "type": "control",
       "slots": {}
+    },
+    "ContainerHubMonitor/hub": {
+      "name": "ContainerHubMonitor/hub",
+      "type": "control",
+      "slots": {}
     }
   },
   "targets": {
