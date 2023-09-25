@@ -76,19 +76,23 @@ local function VoxelScreen(screen)
   -- Consider a few extra offsets that might interfer in our positioning, such as borders and chins
   local baseVoxelOffsetX = 0.5 * voxelBorderSize
   local baseVoxelOffsetY = 0.5 * voxelBorderSize + 0.5 * voxelChinSize
+  local baseVoxelOffsetZ = 0
 
   -- Generates some basic information for screen positioning
 
   -- Get screen orientation (to calculate horizontal and vertical positions), plus the sign (we'll use it to adjust positioning later)
   local screenOrientationHorizontal = vec3(screen.getRight())
   local screenOrientationVertical = vec3(screen.getUp())
+  local screenOrientationForward = vec3(screen.getForward())
   local screenOrientationSignX = getVectorLengthSign(screenOrientationHorizontal)
   local screenOrientationSignY = getVectorLengthSign(screenOrientationVertical)
+  local screenOrientationSignZ = getVectorLengthSign(screenOrientationForward)
 
   -- Get screen positioning (horizontal and vertical)
   local screenPosition = vec3(screen.getPosition())
   local screenPositionX = getVectorSignedLength(screenPosition * screenOrientationHorizontal * screenOrientationSignX)
   local screenPositionY = getVectorSignedLength(screenPosition * screenOrientationVertical * screenOrientationSignY)
+  local screenPositionZ = getVectorSignedLength(screenPosition * screenOrientationForward * screenOrientationSignZ)
 
   -- Finally, let's get the screen's top left coordinate, this is used both to calculate the voxel grid and to calculate positions via getPointOnScreen()
   local screenPositionLeft = screenPositionX + (0.5 * metricWidth) * screenOrientationSignX
@@ -135,15 +139,18 @@ local function VoxelScreen(screen)
     -- Converts position to screen-space
     local pointX = getVectorSignedLength(point * screenOrientationHorizontal * screenOrientationSignX)
     local pointY = getVectorSignedLength(point * screenOrientationVertical * screenOrientationSignY)
+    local pointZ = getVectorSignedLength(point * screenOrientationForward * screenOrientationSignZ)
 
     -- Calculates offset from top left position
     local offsetX = ((screenOrientationSignX > 0) and (screenPositionLeft - pointX)) or (pointX - screenPositionLeft)
     local offsetY = ((screenOrientationSignY > 0) and (screenPositionTop - pointY)) or (pointY - screenPositionTop)
+    local offsetZ = (pointZ - screenPositionZ)
 
     -- Calculates final voxel position
     return {
       convertMetricToVoxelSize(offsetX) - baseVoxelOffsetX,
-      convertMetricToVoxelSize(offsetY) - baseVoxelOffsetY
+      convertMetricToVoxelSize(offsetY) - baseVoxelOffsetY,
+      convertMetricToVoxelSize(offsetZ) - baseVoxelOffsetZ,
     }
   end
 
