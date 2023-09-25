@@ -52,7 +52,6 @@ for _, id in pairs(core.getElementIdList()) do
   if 'ItemContainer' == core.getElementClassById(id) then
     local pos = vec3(core.getElementPositionById(id))
     for idx, screenInfo in pairs(screenSizeAndPosition) do
-      system.print(('%.3f / %.3f'):format((pos - screenInfo.center):len(), screenInfo.size))
       if (pos - screenInfo.center):len() <= screenInfo.size then
         table.insert(screenHubs[idx], id)
       end
