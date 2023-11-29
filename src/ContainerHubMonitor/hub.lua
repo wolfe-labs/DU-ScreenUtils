@@ -6,6 +6,7 @@
 
 -- Customization stuff
 Background = 'assets.prod.novaquark.com/113304/36ab3926-d7d6-4e62-8714-a4c613195004.png' --export: The URL for the background image
+Background_Intensity = 1.0 --export: HDR brightness of the background (0.0 to 5.0)
 Font = 'Oxanium' --export: The font used on the UI
 
 Label_Color = '31,63,255' --export: The color used for the labels under container hubs
@@ -99,6 +100,7 @@ local function updateScreens()
   
       -- Background image
       BACKGROUND = Background,
+      BACKGROUND_INTENSITY = Background_Intensity,
   
       -- Borders
       HUB_BORDER_OFFSET = 8,

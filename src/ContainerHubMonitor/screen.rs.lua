@@ -7,7 +7,6 @@ local HUB_PROGRESS_WIDTH, HUB_PROGRESS_HEIGHT = 1.5 * VOXEL_SIZE, 8
 -- Set-up our background layer
 local layerBackground = createLayer()
 local loadedBackground = loadImage(BACKGROUND)
-addImage(layerBackground, loadedBackground, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT)
 
 -- Set-up our contours layer
 local layerContour = createLayer()
@@ -137,6 +136,8 @@ function drawHub(hub)
 end
 
 -- Draws the background
+setNextFillColor(layerBackground, BACKGROUND_INTENSITY, BACKGROUND_INTENSITY, BACKGROUND_INTENSITY, 1.0);
+addImage(layerBackground, loadedBackground, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT)
 
 -- Draws the hubs
 for _, hub in pairs(hubs) do
