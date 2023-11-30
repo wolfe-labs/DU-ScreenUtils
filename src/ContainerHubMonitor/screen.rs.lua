@@ -17,6 +17,9 @@ local fontLabel = loadFont(HUB_LABEL_FONT, toPixel(HUB_LABEL_SIZE))
 local fontProgress = loadFont(HUB_PROGRESS_FONT_NAME, toPixel(HUB_PROGRESS_FONT_SIZE))
 setDefaultTextAlign(layerData, AlignH_Center, AlignV_Top)
 
+-- Setup our title
+local fontTitle = loadFont(HUB_LABEL_FONT, TITLE_SIZE)
+
 -- Returns an HDR color from RGBA
 function color(intensity, rgba)
   return {
@@ -138,6 +141,13 @@ end
 -- Draws the background
 setNextFillColor(layerBackground, BACKGROUND_INTENSITY, BACKGROUND_INTENSITY, BACKGROUND_INTENSITY, 1.0);
 addImage(layerBackground, loadedBackground, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT)
+
+-- Draws the title
+if (TITLE or ''):len() > 0 and TITLE_POSITION then
+  local width, height = getResolution()
+  setNextTextAlign(layerBackground, AlignH_Center, AlignV_Middle)
+  drawText(layerBackground, fontTitle, TITLE, width * TITLE_POSITION[1], height * TITLE_POSITION[2], HUB_LABEL_COLOR, HUB_LABEL_COLOR_INTENSITY)
+end
 
 -- Draws the hubs
 for _, hub in pairs(hubs) do

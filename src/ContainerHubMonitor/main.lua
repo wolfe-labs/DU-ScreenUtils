@@ -7,6 +7,11 @@ Background = 'assets.prod.novaquark.com/113304/36ab3926-d7d6-4e62-8714-a4c613195
 Background_Intensity = 1.0 --export: HDR brightness of the background (0.0 to 5.0)
 Font = 'Oxanium' --export: The font used on the UI
 
+Title = '' --export: A title for your screen
+Title_X = 0.50 --export: The horizontal position of your title
+Title_Y = 0.25 --export: The vertical position of your title
+Title_Size = 48 --export: The title size, in pixels
+
 Label_Color = '31,63,255' --export: The color used for the labels under container hubs
 Label_Color_Intensity = 2.5 --export: HDR color intensity for the labels
 Label_Percentage = false --export: Show used percentage on labels
@@ -85,6 +90,11 @@ local function updateScreen()
     -- Background image
     BACKGROUND = Background,
     BACKGROUND_INTENSITY = Background_Intensity,
+
+    -- Title
+    TITLE = Title,
+    TITLE_POSITION = { Title_X, Title_Y },
+    TITLE_SIZE = Title_Size,
 
     -- Borders
     HUB_BORDER_OFFSET = 8,
